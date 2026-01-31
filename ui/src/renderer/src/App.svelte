@@ -4,15 +4,9 @@
     import List from "./tabs/List.svelte"
     import Shell from "./tabs/Shell.svelte";
 
-    import { stateStore, connect, onError, handlers } from "./scripts/Bridge";
-
+    import { handlers } from "./scripts/Connector";
     import { Toaster } from '@skeletonlabs/skeleton-svelte';
     import { toaster } from "./scripts/Toast";
-
-    let state: "idle" | "connecting" | "connected" | "disconnected" = "idle";
-    stateStore.subscribe((value) => {
-        state = value;
-    })
 
     let tab = "list";
     const tabs = [
@@ -21,25 +15,6 @@
         
     ]
 
-    const states = {
-        idle: {
-            text: "Idling",
-            css: "opacity-50"
-        },
-        connecting: {
-            text: "Connecting to Daemon...",
-            css: "animate-pulse"
-        },
-        connected: {
-            text: "Connected",
-            css: "opacity-0"
-        },
-        disconnected: {
-            text: "❗ Disconnected",
-            css: "text-error-500"
-        }
-    }
-
     // handlers["auth"] = () => {
     //     tab = "shell"
     // }
@@ -47,14 +22,6 @@
     handlers["setPage"] = (page: string) => {
         tab = page;
     }
-
-    connect()
-    onError((data: any) => {
-        toaster.create({
-            title: data.error || "Daemon Error",
-            type: "error"
-        })
-    })
 </script>
 
 <div class="flex items-center justify-between h-8 w-full fixed top-0 left-0 bg-surface-900 {tab != tabs[0].id ? 'shadow-md' : ''} duration-150 select-none">
@@ -93,22 +60,15 @@
         </div>
     </div>
     <div class="flex-grow overflow-y-scroll">
-        {#if state == "connected"}
-            {#if tab == "list"}
-                <List />
-            {:else if tab == "shell"}
-                <Shell />
-            {:else}
-                <p class="p-3 text-error-500">❗ Tab not found</p>
-            {/if}
+        {#if tab == "list"}
+            <List />
+        {:else if tab == "shell"}
+            <Shell />
+        {:else}
+            <p class="p-3 text-error-500">❗ Tab not found</p>
         {/if}
     </div>
 </div>
 
-<div class="w-full fixed bottom-0 left-0 flex items-center justify-center p-3">
-    <div class="rounded-full py-1 px-3 preset-filled-surface-100-900 duration-1000 {states[state].css}">
-        <p class="text-xs">{states[state].text}</p>
-    </div>
-</div>
 
 <Toaster {toaster}></Toaster>

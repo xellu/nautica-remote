@@ -1,11 +1,49 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+// import { spawn } from "child_process";
+
+// import os from "os";
+// import path from "path";
+
 import icon from '../../resources/icon.png?asset'
 
 let mainWindow: BrowserWindow;
+// let backendProcess;
+
+// function startBackend() {
+//     const pythonPath = "python"; // or absolute path / venv python
+//     const scriptPath = path.join(
+//         os.homedir(),
+//         "NauticaRemote",
+//         "main.py"
+//     );
+//         backendProcess = spawn(pythonPath, [scriptPath], {
+//         stdio: "inherit",
+//         detached: false
+//     });
+//     console.log(scriptPath)
+
+//     backendProcess.on("exit", (code, signal) => {
+//         console.log("Backend exited:", code, signal);
+//     });
+// }
+
+// function stopBackend() {
+//     if (!backendProcess) return;
+
+//     backendProcess.kill("SIGTERM");
+
+//     // hard kill after timeout (Windows-safe)
+//     setTimeout(() => {
+//         if (!backendProcess.killed) {
+//             backendProcess.kill("SIGKILL");
+//         }
+//     }, 3000);
+// }
 
 function createWindow(): void {
+  // startBackend();
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -87,6 +125,13 @@ ipcMain.on("window:close", () => {
 ipcMain.on("window:minimize", () => {
   mainWindow.minimize();
 });
+
+// app.on("before-quit", stopBackend);
+// app.on("will-quit", stopBackend);
+// app.on("window-all-closed", stopBackend);
+// process.on("exit", stopBackend);
+// process.on("SIGINT", stopBackend);
+// process.on("SIGTERM", stopBackend);
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.

@@ -1,9 +1,11 @@
 <script lang="ts">
     import PopUp from "../components/PopUp.svelte";
   
-    import { send, handlers } from "../scripts/Bridge"
-    import { RemoteConfig } from "../scripts/Config";
+    import { handlers } from "../scripts/Connector";
+    // import { RemoteConfig } from "../scripts/Config";
     import { connect, disconnect } from "../scripts/Connector";
+    import { randomString } from "../scripts/Utils"
+
 
     import { onMount } from "svelte"
     import { toaster } from "../scripts/Toast"
@@ -29,7 +31,7 @@
 
     let createServer = {
         open: false,
-        blocked: false,
+        editId: null,
 
         label: "",
         node: "",
@@ -38,44 +40,49 @@
         accessKey: ""
     }
 
-    async function addServer() {
-        if (createServer.blocked) { return; }
+    function getServers() {
+        return JSON.parse(localStorage.getItem("servers") || "[]");
+    }
 
-        createServer.blocked = true;
-
-        let r;
-        let data: any;
-        try {
-            r = await fetch(`http://${RemoteConfig.ip}:${RemoteConfig.port.http}/api/v1/servers/create`, {
-                method: "POST",
-                body: JSON.stringify({
-                    label: createServer.label,
-                    node: createServer.node,
-
-                    ip: createServer.ip, port: parseInt(createServer.port),
-                    accessKey: createServer.accessKey
-                })
-            });
-            data = await r.json();
-        } catch (e) {
-            console.error(e)
-            toaster.create({
-                title: `${e}`,
+    function addServer(): any {
+        if (!createServer.label || !createServer.ip || !createServer.accessKey || !createServer.port) {
+            return toaster.create({
+                title: "Missing fields",
                 type: "error"
             })
-            createServer.blocked = false;
-            return;
         }
 
-        createServer.blocked = false;
-
-        if (!r.ok) {
-            toaster.create({
-                title: data.error || "Failed to add server",
+        let port: number = parseInt(createServer.port)
+        if (port > 65535 || port < 0) {
+            return toaster.create({
+                title: "Invalid port",
                 type: "error"
             })
-            return
         }
+
+        if (createServer.node.length > 40)
+            return toaster.create({
+                title: "Node label too long (max 40 chars allowed)",
+                type: "error"
+            })
+
+        if (createServer.label.length > 128)
+            return toaster.create({
+                title: "Server label too long (max 128 chars allowed)",
+                type: "error"
+            })
+
+        let _servers = getServers()
+        _servers.push({
+            _id: randomString(64),
+            label: createServer.label,
+            node: createServer.node,
+
+            ip: createServer.ip, port: createServer.port,
+            accessKey: createServer.accessKey
+        })
+        localStorage.setItem("servers", JSON.stringify(_servers));
+
 
         toaster.create({
             title: "Server added"
@@ -86,25 +93,110 @@
         createServer.ip = ""
         createServer.port = undefined
         createServer.accessKey = ""
+        createServer.editId = null
 
-        send({id: "nr.list"})
+        servers = getServers()
     }
 
-    onMount(() => {
-        handlers["nr.list"] = (data: any) => {
-            // console.log(data)
-            servers = data.servers;
+    function deleteServer() {
+        if (!createServer.editId) return;
+        if (!confirm("Are you sure?")) return;
+
+        servers = servers.filter((s) => { return s._id != createServer.editId })
+        localStorage.setItem("servers", JSON.stringify(servers));
+
+        createServer.open = false
+        createServer.label = ""
+        createServer.node = ""
+        createServer.ip = ""
+        createServer.port = undefined
+        createServer.accessKey = ""
+        createServer.editId = null
+    }
+
+    function editServer(): any {
+        if (!createServer.editId) return;
+
+        if (!createServer.label || !createServer.ip || !createServer.accessKey || !createServer.port) {
+            return toaster.create({
+                title: "Missing fields",
+                type: "error"
+            })
         }
 
-        send({
-            id: "nr.list"
+        let port: number = parseInt(createServer.port)
+        if (port > 65535 || port < 0) {
+            return toaster.create({
+                title: "Invalid port",
+                type: "error"
+            })
+        }
+
+        if (createServer.node.length > 40)
+            return toaster.create({
+                title: "Node label too long (max 40 chars allowed)",
+                type: "error"
+            })
+
+        if (createServer.label.length > 128)
+            return toaster.create({
+                title: "Server label too long (max 128 chars allowed)",
+                type: "error"
+            })
+
+        let _servers = getServers()
+
+        const index = _servers.findIndex(s => s._id === createServer.editId)
+        if (index === -1) {
+            return toaster.create({
+                title: "Server not found",
+                type: "error"
+            })
+        }
+
+        _servers[index] = {
+            _id: createServer.editId,
+            label: createServer.label,
+            node: createServer.node,
+            ip: createServer.ip,
+            port: port,
+            accessKey: createServer.accessKey
+        }
+
+        localStorage.setItem("servers", JSON.stringify(_servers))
+
+        toaster.create({
+            title: "Server updated"
         })
+
+        createServer.open = false
+        createServer.label = ""
+        createServer.node = ""
+        createServer.ip = ""
+        createServer.port = undefined
+        createServer.accessKey = ""
+        createServer.editId = null
+
+        servers = getServers()
+    }
+
+
+    onMount(() => {
+        servers = getServers()
     })
 </script>
 
 <div class="h-full flex flex-col gap-1 p-3">
     <div class="flex gap-3 p-1.5 bg-surface-900 rounded-xl mb-5">
-        <button class="btn preset-filled-primary-500" onclick={() => {createServer.open = true;}}>Add</button>
+        <button class="btn preset-filled-primary-500" onclick={() => {
+            createServer.editId = null
+            createServer.label = ""
+            createServer.node = ""
+            createServer.ip = ""
+            createServer.port = undefined
+            createServer.accessKey = ""
+            createServer.open = true
+    }}>Add</button>
     </div>
 
     <p class="uppercase font-bold text-surface-500 text-sm">Server List</p>
@@ -113,12 +205,22 @@
             <div>
                 <div class="flex items-center gap-2 flex-wrap">
                     <h2>{s.label}</h2>
-                    <span class="chip preset-tonal-primary py-0.5">{s.node}</span>
+                    {#if s.node}
+                        <span class="chip preset-tonal-primary py-0.5">{s.node}</span>
+                    {/if}    
                 </div>
                 <p class="font-mono text-sm text-surface-300">{s.ip}:{s.port}</p>
             </div>
             <div class="flex items-center gap-1">
-                <button class="btn preset-filled-surface-200-800">
+                <button class="btn preset-filled-surface-200-800" onclick={() => {
+                    createServer.editId = s._id
+                    createServer.label = s.label
+                    createServer.node = s.node
+                    createServer.ip = s.ip
+                    createServer.port = s.port
+                    createServer.accessKey = s.accessKey
+                    createServer.open = true
+                }}>
                     Edit
                 </button>
                 <button class="btn preset-filled-primary-500" onclick={() => {
@@ -135,7 +237,9 @@
 
 <PopUp
     bind:open={createServer.open}
-    title = "Add Server"
+    title = {createServer.editId == null ? "Add Server" : "Edit Server"}
+
+    
 >
     <p class="text-sm">Label</p>
     <input type="text" class="input" bind:value={createServer.label} placeholder="api-public">
@@ -153,7 +257,19 @@
     <p class="text-sm mt-3">Access Key</p>
     <input type="password" class="input" bind:value={createServer.accessKey}>
 
-    <button class="btn preset-filled-primary-500 mt-5 w-full" disabled={createServer.blocked} onclick={() => {
-        addServer()
-    }}>Add</button>
+    {#if createServer.editId == null}
+        <button class="btn preset-filled-primary-500 mt-5 w-full" onclick={() => {
+            addServer()
+        }}>Add</button>
+    {:else}
+        <div class="mt-5 flex gap-3">
+            <button class="btn preset-filled-error-500 w-1/3" onclick={() => {
+                deleteServer()
+            }}>Delete</button>
+
+            <button class="btn preset-filled-primary-500 w-2/3" onclick={() => {
+                editServer()
+            }}>Save Changes</button>
+        </div>
+    {/if}
 </PopUp>
