@@ -1,0 +1,43 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+
+@import '@skeletonlabs/skeleton';
+@import '@skeletonlabs/skeleton/optional/presets';
+@import '@skeletonlabs/skeleton/themes/catppuccin';
+@import '@skeletonlabs/skeleton/themes/crimson';
+@import "./theme-frost.css";
+
+@source '../../../../node_modules/@skeletonlabs/skeleton-svelte/dist';
+
+.drag-area {
+	-webkit-app-region: drag;
+}
+
+.drag-area button {
+    -webkit-app-region: no-drag !important;
+}
+
+.material-symbols-sharp {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24
+}
+
+.debug, .debug * {
+    border: 1px palevioletred solid;
+}
+
+@font-face {
+    font-family: "Figtree";
+    src: url("./figtree.ttf");
+}
+@font-face {
+    font-family: "JetbrainsMono";
+    src: url("./jetbrains-mono.ttf");
+}
+
+@theme {
+    --font-mono: "JetbrainsMono", monospace;
+}

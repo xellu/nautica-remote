@@ -63,14 +63,14 @@ class WebSocketHandler:
             logger.debug(f"{self.ip}: PIN <- {self.path} ({payload})")
             
             handler = RouteRegistry._getHandler(self.path, payload["id"])
-            if not handler:
+            if handler is None:
                 await self.send(Error("No handler found for '{payload['id']}'"))
 
             res = await handler(payload)
             if res:
-                await self.send(**res)
+                await self.send(res)
         
-    async def send(self, **kwargs):
+    async def send(self, kwargs):
         logger.debug(f"{self.ip}: POUT -> {self.path} ({kwargs})")
         await self.ws.send(json.dumps(kwargs))
         

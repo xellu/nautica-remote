@@ -201,6 +201,10 @@ def after_req(res):
         logger.warn(message)
     else: #5XX & unknown
         logger.error(message)
+        
+    res.headers["Access-Control-Allow-Origin"] = "*"  # allow all origins
+    # res.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    # res.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
 
     return res
 
