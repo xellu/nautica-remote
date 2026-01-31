@@ -1,0 +1,41 @@
+{
+    "framework": {
+        "devMode": true,
+        "preloadConfigs": true,
+        "disableCacheFiles": true
+    },
+    "servers": {
+        "http": {
+            "enabled": true,
+            
+            "host": "127.0.0.1",
+            "port": 28100,
+
+            "realIPHeader": null,
+            "allowSchemeRequests": true
+        },
+        "ws": {
+            "enabled": true,
+
+            "host": "127.0.0.1",
+            "port": 28200
+        }
+    },
+    "services": {
+        "config": {
+        },
+        "sessions": {
+            "enabled": false
+        },
+        "remoteAccess": {
+            "enabled": false,
+            "accessKeys": [],
+            
+            "host": "127.0.0.1",
+            "port": 3711
+        },
+        "database": {
+            "mongoUri": null
+        }
+    }
+}
