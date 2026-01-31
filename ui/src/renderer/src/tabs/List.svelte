@@ -124,6 +124,7 @@
                 <button class="btn preset-filled-primary-500" onclick={() => {
                     disconnect();
                     connect(s.ip, s.port, s.accessKey);
+                    handlers["setPage"]("shell")
                 }}>
                     Connect
                 </button>

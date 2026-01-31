@@ -14,7 +14,7 @@
             css: "opacity-50"
         },
         connecting: {
-            text: "Connecting to Daemon...",
+            text: "Connecting to server...",
             css: "animate-pulse"
         },
         connected: {

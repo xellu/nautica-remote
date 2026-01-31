@@ -4,8 +4,7 @@
     import List from "./tabs/List.svelte"
     import Shell from "./tabs/Shell.svelte";
 
-    import { stateStore, connect, onError } from "./scripts/Bridge";
-    import { handlers } from "./scripts/Connector";
+    import { stateStore, connect, onError, handlers } from "./scripts/Bridge";
 
     import { Toaster } from '@skeletonlabs/skeleton-svelte';
     import { toaster } from "./scripts/Toast";
@@ -41,8 +40,12 @@
         }
     }
 
-    handlers["auth"] = () => {
-        tab = "shell"
+    // handlers["auth"] = () => {
+    //     tab = "shell"
+    // }
+
+    handlers["setPage"] = (page: string) => {
+        tab = page;
     }
 
     connect()
