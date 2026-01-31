@@ -1,10 +1,10 @@
 {
-  "name": "strata",
+  "name": "nautica-remote",
   "version": "1.0.0",
-  "description": "A Runtime for building and running Python applications with a modern web interface.",
+  "description": "A Remote Access interface for Nautica API servers",
   "main": "./out/main/index.js",
   "author": "https://xellu.xyz",
-  "homepage": "https://strata.xellu.xyz/",
+  "homepage": "https://xellu.xyz/",
   "scripts": {
     "format": "prettier --plugin prettier-plugin-svelte --write .",
     "lint": "eslint --cache .",

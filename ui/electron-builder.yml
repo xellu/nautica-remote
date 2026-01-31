@@ -1,5 +1,5 @@
-appId: xyz.xellu.strata
-productName: Strata
+appId: xyz.xellu.nauticaremote
+productName: NauticaRemote
 directories:
   buildResources: build
 files:
@@ -13,7 +13,7 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: Strata
+  executableName: NauticaRemote
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
@@ -34,11 +34,11 @@ linux:
     - AppImage
     - snap
     - deb
-  maintainer: xyz.xellu.strata
+  maintainer: xyz.xellu.nauticaremote
   category: Utility
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
 publish:
   provider: generic
-  url: https://strata.xellu.xyz/
+  url: https://xellu.xyz/
