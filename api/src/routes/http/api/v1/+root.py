@@ -9,6 +9,6 @@ from nautica.api.http import (
 )
 from nautica.api import Config
 
-@Request.GET()
-def test(ctx: Context):
-    return
+# @Request.GET()
+# def test(ctx: Context):
+#     return

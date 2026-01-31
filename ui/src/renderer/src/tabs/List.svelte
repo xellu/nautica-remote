@@ -3,9 +3,10 @@
   
     import { send, handlers } from "../scripts/Bridge"
     import { RemoteConfig } from "../scripts/Config";
+    import { connect, disconnect } from "../scripts/Connector";
 
     import { onMount } from "svelte"
-  import { toaster } from "../scripts/Toast"
+    import { toaster } from "../scripts/Toast"
   
   
     let servers: {
@@ -14,7 +15,8 @@
         node: string,
 
         ip: string,
-        port: number
+        port: number,
+        accessKey: string
     }[] = [
         // {
         //     label: "api-public",
@@ -90,8 +92,7 @@
 
     onMount(() => {
         handlers["nr.list"] = (data: any) => {
-            // servers = data.servers;
-            console.log(data)
+            // console.log(data)
             servers = data.servers;
         }
 
@@ -108,7 +109,7 @@
 
     <p class="uppercase font-bold text-surface-500 text-sm">Server List</p>
     {#each servers as s}
-        <div class="border border-surface-900 rounded-2xl p-3 flex justify-between items-start">
+        <div class="border border-surface-900 rounded-2xl p-3 flex justify-between items-start group">
             <div>
                 <div class="flex items-center gap-2 flex-wrap">
                     <h2>{s.label}</h2>
@@ -120,7 +121,10 @@
                 <button class="btn preset-filled-surface-200-800">
                     Edit
                 </button>
-                <button class="btn preset-filled-primary-500">
+                <button class="btn preset-filled-primary-500" onclick={() => {
+                    disconnect();
+                    connect(s.ip, s.port, s.accessKey);
+                }}>
                     Connect
                 </button>
             </div>

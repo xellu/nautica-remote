@@ -10,9 +10,7 @@
         default-src 'self';
         script-src 'self';
         style-src 'self' 'unsafe-inline';
-        connect-src 'self'
-          http://127.0.0.1:28100
-          ws://127.0.0.1:28200;
+        connect-src 'self' ws: wss: http:;
         img-src 'self' data:
       "
     />

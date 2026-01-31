@@ -1,6 +1,3 @@
-// import { writable, type Writable } from "svelte/store";
-import { RemoteConfig } from "./Config";
-
 import { writable, type Writable } from "svelte/store";
 
 let ws: WebSocket;
@@ -12,7 +9,7 @@ const errorHandlers: Function[] = [];
 const handlers: {[key: string]: (data: any) => void} = {
     error: (packet: any) => { //handles errors
         errorHandlers.forEach((fn) => fn(packet.content));
-    },
+    }
 }
 
 const onError = (fn: Function) => {
@@ -43,14 +40,14 @@ const send = (data: any) => {
     });
 }
 
-const connect = () => {
+const connect = (ip: string, port: number, accessKey: string) => {
     stateStore.set("connecting");
-    ws = new WebSocket(`ws://${RemoteConfig.ip}:${RemoteConfig.port.ws}/nautica-remote`);
+    ws = new WebSocket(`ws://${ip}:${port}/nautica:remote`);
     
     ws.onopen = () => {
         stateStore.set("connected");
 
-        send({id: "nr.list"})
+        send({id: "auth", accessKey: accessKey})
     }
 
     ws.onmessage = (event) => {
@@ -61,7 +58,7 @@ const connect = () => {
         wsTrafficStore.set({in: [], out: []});
         stateStore.set("disconnected");
 
-        setTimeout(() => connect(), 1000)
+        // setTimeout(() => connect(ip, port, accessKey), 1000)
     }
 
     ws.onerror = (error) => {
@@ -70,7 +67,10 @@ const connect = () => {
 }
 
 const disconnect = () => {
-    ws.close();
+    if (ws) {
+        ws.close();
+        ws = null;
+    }
 }
 
 export {
@@ -83,5 +83,4 @@ export {
     handlers,
     stateStore,
     wsTrafficStore,
-    serverLogs,
 }

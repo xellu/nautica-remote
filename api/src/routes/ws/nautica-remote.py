@@ -1,6 +1,7 @@
 from nautica.api.ws import (
     Packet,
-    Reply
+    Reply,
+    Error
 )
 from src.lib.ServerList import Servers
 
@@ -9,7 +10,7 @@ async def server_list(payload):
     out = []
     for k, v in Servers.data.items():
         server = v.copy()
-        del server["accessKey"]
+        # del server["accessKey"]
         
         out.append(server)
         

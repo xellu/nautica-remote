@@ -1,10 +1,12 @@
 <script lang="ts">
     import logo from "./assets/logo.svg";
+
     import List from "./tabs/List.svelte"
+    import Shell from "./tabs/Shell.svelte";
 
-    import { stateStore, connect } from "./scripts/Bridge";
+    import { stateStore, connect, onError } from "./scripts/Bridge";
+    import { handlers } from "./scripts/Connector";
 
-    import { onMount } from "svelte"
     import { Toaster } from '@skeletonlabs/skeleton-svelte';
     import { toaster } from "./scripts/Toast";
 
@@ -39,12 +41,20 @@
         }
     }
 
-    onMount(() => {
-        connect()
+    handlers["auth"] = () => {
+        tab = "shell"
+    }
+
+    connect()
+    onError((data: any) => {
+        toaster.create({
+            title: data.error || "Daemon Error",
+            type: "error"
+        })
     })
 </script>
 
-<div class="flex items-center justify-between h-8 w-full fixed top-0 left-0 bg-surface-900 {tab != tabs[0].id ? 'shadow-md' : ''} duration-150">
+<div class="flex items-center justify-between h-8 w-full fixed top-0 left-0 bg-surface-900 {tab != tabs[0].id ? 'shadow-md' : ''} duration-150 select-none">
     <img src="{logo}" alt="" class="select-none h-8 p-2 drag-area" draggable="false">
     <div class="grow drag-area h-8"></div>
     <div class="flex">
@@ -62,7 +72,7 @@
 </div>
 
 <div class="h-screen w-full pt-8 flex">
-    <div class="h-full flex flex-col bg-surface-900 w-56 min-w-56 pl-8">
+    <div class="h-full flex flex-col bg-surface-900 w-56 min-w-56 pl-8 select-none">
         {#each tabs as t, index}
             <div class="w-full {index > 0 && tabs[index-1].id == tab ? 'bg-surface-950' : ''} {index < tabs.length-1 && tabs[index+1].id == tab ? 'bg-surface-950' : ''} ">
                 <button
@@ -80,16 +90,20 @@
         </div>
     </div>
     <div class="flex-grow overflow-y-scroll">
-        {#if tab == "list"}
-            <List />
-        {:else}
-            <p class="p-3 text-error-500">❗ Tab not found</p>
+        {#if state == "connected"}
+            {#if tab == "list"}
+                <List />
+            {:else if tab == "shell"}
+                <Shell />
+            {:else}
+                <p class="p-3 text-error-500">❗ Tab not found</p>
+            {/if}
         {/if}
     </div>
 </div>
 
 <div class="w-full fixed bottom-0 left-0 flex items-center justify-center p-3">
-    <div class="rounded-full py-1 px-3 preset-filled-surface-100-900 duration-300 {states[state].css}">
+    <div class="rounded-full py-1 px-3 preset-filled-surface-100-900 duration-1000 {states[state].css}">
         <p class="text-xs">{states[state].text}</p>
     </div>
 </div>
